@@ -18,10 +18,9 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
-  final String _baseUrl = 'http://10.5.32.174:81/SimasPerbanas/api';
 
   Future<void> _login() async {
-    final username = _usernameController.text;
+    final username = _usernameController.text.trim();
     final password = _passwordController.text;
 
     if (username.isEmpty || password.isEmpty) {
@@ -32,21 +31,20 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      debugPrint('Mencoba login ke: $_baseUrl/login.php');
+      final loginUrl = '${ApiConfig.baseUrl}${ApiConfig.login}';
+      debugPrint('Mencoba login ke: $loginUrl');
 
       final response = await http.post(
-        Uri.parse('$_baseUrl/login.php'),
+        Uri.parse(loginUrl),
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
         body: jsonEncode(<String, String>{
-          'nim': username.trim(),
+          'nim': username,
           'password': password,
         }),
-      );
+      ).timeout(const Duration(seconds: 10));
 
-
-      // _showErrorDialog(username); // Hapus baris ini, ini hanya untuk debugging yang tidak perlu
       debugPrint('Response status: ${response.statusCode}');
       debugPrint('Response body: ${response.body}');
 
@@ -56,57 +54,50 @@ class _LoginPageState extends State<LoginPage> {
         if (data['status'] == 'success') {
           final userData = data['data'];
 
-          // ==============================================================
-          // ✨ BAGIAN INI SUDAH BENAR & MENGGUNAKAN AWAIT UNTUK PENYIMPANAN
-          // ==============================================================
+          // Simpan data ke SharedPreferences
           final prefs = await SharedPreferences.getInstance();
           await prefs.setBool('isLoggedIn', true);
           await prefs.setInt('loginTime', DateTime.now().millisecondsSinceEpoch);
           await prefs.setInt('sessionDuration', 30);
-          await prefs.setString('id', userData['id_user']?.toString() ?? '');
+          await prefs.setString('id_user', userData['id_user'].toString());
           await prefs.setString('nim', userData['nim'] ?? '');
           await prefs.setString('nama', userData['nama'] ?? '');
           await prefs.setString('email', userData['email'] ?? '');
           await prefs.setString('role', 'mahasiswa');
 
-          // Opsional: Coba reload setelah simpan (untuk memastikan sinkronisasi)
-          await prefs.reload();
-          // ==============================================================
+          // Verifikasi data tersimpan
+          final savedId = prefs.getString('id_user');
+          final savedNim = prefs.getString('nim');
+          debugPrint('Data tersimpan - ID: $savedId, NIM: $savedNim');
 
           _showSuccessDialog('Login berhasil!\nSelamat datang, ${userData['nama']}!');
         } else {
           _showErrorDialog(data['message'] ?? 'Login gagal');
         }
       } else {
-        _showErrorDialog('Error HTTP ${response.statusCode}: Gagal terhubung ke server');
+        _showErrorDialog('Error HTTP ${response.statusCode}: ${response.body}');
       }
+    } on TimeoutException {
+      _showErrorDialog('Koneksi timeout. Periksa koneksi internet Anda.');
     } on http.ClientException catch (e) {
       debugPrint('ClientException: $e');
-      _showErrorDialog('Tidak dapat terhubung ke server. Pastikan:\n• Server XAMPP berjalan\n• URL benar: $_baseUrl\n• Port 80 tidak digunakan aplikasi lain\n\nDetail: $e');
-    } on TimeoutException catch (e) {
-      debugPrint('TimeoutException: $e');
-      _showErrorDialog('$e');
+      _showErrorDialog('Tidak dapat terhubung ke server. Pastikan:\n• Server berjalan\n• IP dan port benar\n\nDetail: $e');
     } catch (e, st) {
       debugPrint('ERROR saat login: $e');
-      debugPrintStack(stackTrace: st);
+      debugPrint('Stack trace: $st');
       _showErrorDialog('Terjadi kesalahan: ${e.toString()}');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  // Fungsi navigasi ke halaman utama setelah login
   void _navigateToMainApp() {
-    // Navigasi ke HalamanSatu (Halaman Utama)
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const HalamanSatu()),
-          (route) => false,
+      (route) => false,
     );
   }
 
-  // ... (Sisanya adalah widget dan dialog yang tidak perlu diubah) ...
-
-  // 🔹 Dialog error
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -125,7 +116,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // 🔹 Dialog sukses
   void _showSuccessDialog(String message) {
     showDialog(
       context: context,
@@ -136,7 +126,6 @@ class _LoginPageState extends State<LoginPage> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              // Panggil navigasi ke halaman utama
               _navigateToMainApp();
             },
             child: const Text('OK'),
@@ -146,6 +135,29 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  // Test koneksi ke server
+  Future<void> _testConnection() async {
+    try {
+      final testUrl = '${ApiConfig.baseUrl}${ApiConfig.login}';
+      debugPrint('Testing connection to: $testUrl');
+      
+      final response = await http.get(
+        Uri.parse(testUrl),
+      ).timeout(const Duration(seconds: 5));
+      
+      debugPrint('Connection test response: ${response.statusCode}');
+    } catch (e) {
+      debugPrint('Connection test failed: $e');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Test koneksi saat init
+    _testConnection();
+  }
+
   @override
   void dispose() {
     _usernameController.dispose();
@@ -153,7 +165,6 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  // Widget
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -264,26 +275,25 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           child: _isLoading
                               ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
                               : const Text(
-                            'MASUK',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                                  'MASUK',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // 🔹 Info koneksi
                       Text(
-                        'API: $_baseUrl',
+                        'Endpoint: ${ApiConfig.baseUrl}${ApiConfig.login}',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade500,

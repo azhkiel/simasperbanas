@@ -9,7 +9,6 @@ import '../widgets/custom_app_bar.dart';
 import 'login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'session_manager.dart';
-import 'services/api_config.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
