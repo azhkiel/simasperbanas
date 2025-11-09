@@ -12,7 +12,7 @@ class PanduanSoftSkillPage extends StatefulWidget {
 
 class _PanduanSoftSkillPageState extends State<PanduanSoftSkillPage> {
   String? selectedUnsur = 'Pilih Unsur';
-  final unsurList = const ['Pilih Unsur','Bakat & Minat','Pengabdian Masyarakat','Organisasi','Kepemimpinan'];
+  final unsurList = const ['Pilih Unsur','Bakat & Minat','penalaran','Pengabdian Masyarakat'];
 
   InputDecoration _dec() => InputDecoration(
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

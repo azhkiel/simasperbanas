@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const primaryBlue = Color(0xFF1E88E5);
 
@@ -10,6 +11,8 @@ class CetakPernyataanData extends StatefulWidget {
 }
 
 class _CetakPernyataanDataState extends State<CetakPernyataanData> {
+  String _userName = 'Pengguna';
+  String _nim = '00000000000';
   final List<Map<String, dynamic>> activities = const [
     {
       'no': 1,
@@ -42,7 +45,31 @@ class _CetakPernyataanDataState extends State<CetakPernyataanData> {
       'basis': 'Per sertifikat'
     },
   ];
+ @override
+  void initState() {  // ✅ Tambahkan ini
+    super.initState();
+    _loadUserData();
+  }
+void _loadUserData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? userName = prefs.getString('nama');
 
+      if (mounted) {
+        setState(() {
+          _userName = userName ?? 'Pengguna';
+          _nim = prefs.getString('nim') ?? '00000000000';
+        });
+      }
+    } catch (e) {
+      print('Error loading user data: $e');
+      if (mounted) {
+        setState(() {
+          _userName = 'Pengguna';
+        });
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -53,13 +80,13 @@ class _CetakPernyataanDataState extends State<CetakPernyataanData> {
           Card(
             elevation: 2,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.all(16),
               child: Column(
                 children: [
-                  _InfoRow(label: 'Nama', value: 'Savio Septya Kusuma'),
+                  _InfoRow(label: 'Nama', value: _userName),
                   _InfoRow(label: 'Program Studi', value: 'SI Informatika'),
-                  _InfoRow(label: 'NIM', value: '20230201001'),
+                  _InfoRow(label: 'NIM', value: _nim),
                   _InfoRow(label: 'Dosen Wali', value: 'Harlad Yutanto S.Kom., M.Kom.'),
                 ],
               ),
@@ -70,7 +97,7 @@ class _CetakPernyataanDataState extends State<CetakPernyataanData> {
             child: Text('PERNYATAAN KESESUAIAN DATA', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
           const SizedBox(height: 12),
-          ...activities.map((a) => _ActivityCard(activity: a)),
+          ...activities.map((a) => _ActivityCard(activity: a)).toList(),
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,

@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-// WAJIB: Import untuk HTTP Client dan JSON decoding
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-// Import untuk penanganan Timeout
 import 'dart:async';
-
-// Asumsi ini adalah import yang diperlukan
-import '../../../widgets/custom_app_bar.dart'; // Sesuaikan path ini jika salah
+import 'package:simasperbanas/widgets/custom_app_bar.dart'; // Sesuaikan path ini jika salah
 
 class CatalogPage extends StatefulWidget {
   const CatalogPage({super.key});

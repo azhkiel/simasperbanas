@@ -1,22 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import '../Layanan Kampus/Akademik/akademik.dart';
-import '../Layanan Kampus/Akademik/options/daftar_rencana_studi.dart';
-import '../Layanan Kampus/Akademik/options/jadwal_tugas_akhir.dart';
-import '../Layanan Kampus/Akademik/options/jadwal_ujian.dart';
-import '../Layanan Kampus/Akademik/options/khs.dart';
-import '../Layanan Kampus/Akademik/options/kinerja.dart';
-import '../Layanan Kampus/Akademik/options/nilai_ujian.dart';
-import '../Layanan Kampus/Akademik/options/presensi_kuliah.dart';
-import '../Layanan Kampus/Akademik/options/tugas_akhir.dart';
-import '../Layanan Kampus/Catalog/catalog.dart';
-import '../Layanan Kampus/Kemahasiswaan/Kemahasiswaan.dart';
-import '../Layanan Kampus/Keuangan/Keuangan.dart';
-import '../Layanan Kampus/Keuangan/memilih/kewajiban_mahasiswa.dart';
-import '../Layanan Kampus/Keuangan/memilih/kode_pembayaran.dart';
-import '../Layanan Kampus/Keuangan/memilih/riwayat_pembayaran.dart';
-import '../Layanan Kampus/Perpustakaan/Perpustakaan.dart';
+import 'package:simasperbanas/login.dart';
+import 'package:simasperbanas/session_manager.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -28,12 +14,14 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(220);
 }
 
-class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderStateMixin {
+class _CustomAppBarState extends State<CustomAppBar>
+    with SingleTickerProviderStateMixin {
   Timer? _timer;
   String _hari = '';
   String _tanggal = '';
   String _jam = '';
-  String _userName = 'Pengguna'; // Default value
+  String _userName = 'Pengguna';
+  String _nim = '00000000000';
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   List<String> _filteredSuggestions = [];
@@ -50,7 +38,16 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
   final List<Map<String, dynamic>> _allServices = [
     {
       'name': 'Akademik',
-      'keywords': ['akademik', 'nilai', 'khs', 'krs', 'transkrip', 'jadwal', 'dosen', 'kuliah'],
+      'keywords': [
+        'akademik',
+        'nilai',
+        'khs',
+        'krs',
+        'transkrip',
+        'jadwal',
+        'dosen',
+        'kuliah',
+      ],
       'route': 'akademik',
       'icon': Icons.school,
     },
@@ -110,7 +107,13 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
     },
     {
       'name': 'Kemahasiswaan',
-      'keywords': ['kemahasiswaan', 'organisasi', 'ukm', 'beasiswa', 'prestasi'],
+      'keywords': [
+        'kemahasiswaan',
+        'organisasi',
+        'ukm',
+        'beasiswa',
+        'prestasi',
+      ],
       'route': 'kemahasiswaan',
       'icon': Icons.people,
     },
@@ -145,6 +148,31 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
       'icon': Icons.library_books,
     },
   ];
+  Future<void> manualLogout(BuildContext context) async {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Konfirmasi Logout'),
+      content: const Text('Apakah Anda yakin ingin logout?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        TextButton(
+          onPressed: () async {
+            await SessionManager.logout();
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+              (route) => false,
+            );
+          },
+          child: const Text('Logout'),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   void initState() {
@@ -162,10 +190,7 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
         });
       }
     });
-
-    // Load user data dari SharedPreferences
     _loadUserData();
-    // Load data KRS dan mata kuliah
     _loadAcademicData();
 
     _searchController.addListener(_onSearchChanged);
@@ -181,6 +206,7 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
       if (mounted) {
         setState(() {
           _userName = userName ?? 'Pengguna';
+          _nim = prefs.getString('nim') ?? '00000000000';
         });
       }
     } catch (e) {
@@ -233,13 +259,13 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
       {
         'semester': 'Ganjil 2023/2024',
         'mataKuliah': ['Matematika Dasar', 'Pemrograman Dasar'],
-        'status': 'Disetujui'
+        'status': 'Disetujui',
       },
       {
         'semester': 'Genap 2022/2023',
         'mataKuliah': ['Pengantar TI', 'Bahasa Indonesia'],
-        'status': 'Selesai'
-      }
+        'status': 'Selesai',
+      },
     ];
   }
 
@@ -254,22 +280,22 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
         'nama': 'Matematika Dasar',
         'sks': 3,
         'dosen': 'Dr. Ahmad',
-        'kelas': 'A'
+        'kelas': 'A',
       },
       {
         'kode': 'PROG101',
         'nama': 'Pemrograman Dasar',
         'sks': 4,
         'dosen': 'Dr. Budi',
-        'kelas': 'B'
+        'kelas': 'B',
       },
       {
         'kode': 'PTI101',
         'nama': 'Pengantar Teknologi Informasi',
         'sks': 2,
         'dosen': 'Dr. Citra',
-        'kelas': 'A'
-      }
+        'kelas': 'A',
+      },
     ];
   }
 
@@ -301,7 +327,7 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
       'Rabu',
       'Kamis',
       'Jumat',
-      'Sabtu'
+      'Sabtu',
     ];
     const List<String> bulanIndonesia = [
       'Januari',
@@ -315,12 +341,13 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
       'September',
       'Oktober',
       'November',
-      'Desember'
+      'Desember',
     ];
 
     _hari = hariIndonesia[now.weekday % 7];
     _tanggal = '${now.day} ${bulanIndonesia[now.month - 1]} ${now.year}';
-    _jam = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    _jam =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
   }
 
   void _onSearchChanged() {
@@ -358,7 +385,9 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
   }
 
   void _onFocusChanged() {
-    if (_searchFocusNode.hasFocus && _searchController.text.isNotEmpty && _filteredSuggestions.isNotEmpty) {
+    if (_searchFocusNode.hasFocus &&
+        _searchController.text.isNotEmpty &&
+        _filteredSuggestions.isNotEmpty) {
       _showOverlay();
     } else if (!_searchFocusNode.hasFocus) {
       _removeOverlay();
@@ -416,12 +445,12 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
                     padding: EdgeInsets.zero,
                     children: _filteredSuggestions.map((suggestion) {
                       final service = _allServices.firstWhere(
-                            (s) => s['name'] == suggestion,
+                        (s) => s['name'] == suggestion,
                       );
                       return _buildSuggestionItem(
                         suggestion,
                         service['icon'] as IconData,
-                            () => _navigateToService(service),
+                        () => _navigateToService(service),
                       );
                     }).toList(),
                   ),
@@ -459,11 +488,7 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
                   color: Colors.blue.shade50,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: Colors.blue.shade700,
-                ),
+                child: Icon(icon, size: 20, color: Colors.blue.shade700),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -805,7 +830,7 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
               end: Alignment.bottomRight,
               colors: [
                 const Color(0xFF1A4F8E).withOpacity(0.95),
-                const Color(0xFF2D7BC4).withOpacity(0.95)
+                const Color(0xFF2D7BC4).withOpacity(0.95),
               ],
             ),
             borderRadius: const BorderRadius.only(
@@ -843,7 +868,7 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
                                 gradient: LinearGradient(
                                   colors: [
                                     Colors.white.withOpacity(0.5),
-                                    Colors.white.withOpacity(0.1)
+                                    Colors.white.withOpacity(0.1),
                                   ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
@@ -851,7 +876,9 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
                               ),
                               child: const CircleAvatar(
                                 radius: 28,
-                                backgroundImage: NetworkImage('https://picsum.photos/100'),
+                                backgroundImage: NetworkImage(
+                                  'https://picsum.photos/100',
+                                ),
                               ),
                             ),
                             const SizedBox(width: 15),
@@ -882,57 +909,85 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
                                   ),
+                                  Text(
+                                    _nim,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      height: 1.2,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
                                 ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                      // Bagian kanan: Tanggal & Jam
-                      Transform.translate(
-                        offset: const Offset(0, -3.5),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "$_hari, $_tanggal",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                height: 1.2,
+                      // Bagian kanan: Tanggal, Jam & Logout
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    "$_hari, $_tanggal",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    _jam,
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.9),
+                                      fontSize: 12,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(height: 5),
-                            Text(
-                              _jam,
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
-                                fontSize: 12,
-                                height: 1.2,
+                              const SizedBox(width: 8),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.logout, color: Colors.white),
+                                  iconSize: 22,
+                                  padding: const EdgeInsets.all(8),
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () => manualLogout(context),
+                                  tooltip: 'Logout',
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                  // Baris bawah: Pencarian
+                  ),                 // Baris bawah: Pencarian
                   Container(
                     height: 50,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(25),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.2),
-                      ),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.1),
                           blurRadius: 10,
                           spreadRadius: 1,
-                        )
+                        ),
                       ],
                     ),
                     child: Row(
@@ -960,7 +1015,9 @@ class _CustomAppBarState extends State<CustomAppBar> with SingleTickerProviderSt
                               ),
                               border: InputBorder.none,
                               isDense: true,
-                              contentPadding: EdgeInsets.symmetric(vertical: 15),
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 15,
+                              ),
                             ),
                             onSubmitted: _handleSearch,
                           ),

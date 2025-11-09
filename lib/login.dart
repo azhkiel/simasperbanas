@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
 import './services/api_config.dart';
-import 'main.dart';
+import 'home.dart';
+import 'session_manager.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -54,21 +54,12 @@ class _LoginPageState extends State<LoginPage> {
         if (data['status'] == 'success') {
           final userData = data['data'];
 
-          // Simpan data ke SharedPreferences
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('isLoggedIn', true);
-          await prefs.setInt('loginTime', DateTime.now().millisecondsSinceEpoch);
-          await prefs.setInt('sessionDuration', 30);
-          await prefs.setString('id_user', userData['id_user'].toString());
-          await prefs.setString('nim', userData['nim'] ?? '');
-          await prefs.setString('nama', userData['nama'] ?? '');
-          await prefs.setString('email', userData['email'] ?? '');
-          await prefs.setString('role', 'mahasiswa');
+          // Simpan data menggunakan SessionManager
+          await SessionManager.saveLoginData(userData);
 
           // Verifikasi data tersimpan
-          final savedId = prefs.getString('id_user');
-          final savedNim = prefs.getString('nim');
-          debugPrint('Data tersimpan - ID: $savedId, NIM: $savedNim');
+          final savedData = await SessionManager.getUserData();
+          debugPrint('Data tersimpan - ID: ${savedData['id_user']}, NIM: ${savedData['nim']}');
 
           _showSuccessDialog('Login berhasil!\nSelamat datang, ${userData['nama']}!');
         } else {
