@@ -1,0 +1,84 @@
+<?php
+require_once __DIR__.'/config.php';
+
+$body = json_decode(file_get_contents('php://input'), true);
+if(!is_array($body)) {
+    respond_json(['message'=>'Invalid JSON'], 400);
+}
+
+// Validasi field required
+$required_fields = ['nim','kategori','sub_kategori','kegiatan','tanggal','poin','status'];
+foreach($required_fields as $r) {
+    if(!isset($body[$r]) || $body[$r] === '') {
+        respond_json(['message'=>"Field $r required"], 400);
+    }
+}
+
+// Format tanggal - handle berbagai format input
+$timestamp = strtotime($body['tanggal']);
+if ($timestamp === false) {
+    respond_json(['message'=>'Invalid date format'], 400);
+}
+$dt = date('Y-m-d H:i:s', $timestamp);
+
+// Set default values untuk field opsional
+$deskripsi = $body['deskripsi'] ?? '';
+$file_name = $body['file_name'] ?? '';
+$file_path = $body['file_path'] ?? '';
+
+// Pastikan poin adalah numeric
+if (!is_numeric($body['poin'])) {
+    respond_json(['message'=>'Poin must be a number'], 400);
+}
+
+$stmt = $mysqli->prepare("INSERT INTO softskills (nim, kategori, sub_kategori, kegiatan, tanggal, poin, status, deskripsi, file_name, file_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+if (!$stmt) {
+    respond_json(['message'=>'Prepare failed: '.$mysqli->error], 500);
+}
+
+// Bind parameters - gunakan variabel yang sudah didefinisikan
+$bind_result = $stmt->bind_param(
+    'sssssdssss',
+    $body['nim'], 
+    $body['kategori'], 
+    $body['sub_kategori'], 
+    $body['kegiatan'], 
+    $dt, 
+    $body['poin'],
+    $body['status'], 
+    $deskripsi, 
+    $file_name, 
+    $file_path
+);
+
+if (!$bind_result) {
+    respond_json(['message'=>'Bind param failed: '.$stmt->error], 500);
+}
+
+if(!$stmt->execute()) {
+    respond_json(['message'=>'Insert error: '.$stmt->error], 500);
+}
+
+$id = $stmt->insert_id;
+
+// Ambil data yang baru saja diinsert
+$get = $mysqli->prepare("SELECT id, nim, kategori, sub_kategori, kegiatan, DATE_FORMAT(tanggal,'%Y-%m-%dT%H:%i:%sZ') AS tanggal, poin, status, deskripsi, file_name, file_path FROM softskills WHERE id=?");
+if (!$get) {
+    respond_json(['message'=>'Prepare select failed: '.$mysqli->error], 500);
+}
+
+$get->bind_param('i', $id); 
+if (!$get->execute()) {
+    respond_json(['message'=>'Select execute failed: '.$get->error], 500);
+}
+
+$result = $get->get_result();
+$row = $result->fetch_assoc();
+
+if (!$row) {
+    respond_json(['message'=>'Failed to retrieve inserted data'], 500);
+}
+
+respond_json($row, 201);
+?>

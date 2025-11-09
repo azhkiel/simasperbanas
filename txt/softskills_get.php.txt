@@ -1,0 +1,9 @@
+<?php
+require_once __DIR__.'/config.php';
+$nim = $_GET['nim'] ?? '';
+if ($nim==='') respond_json(['message'=>'nim required'],400);
+$stmt=$mysqli->prepare("SELECT id, nim, kategori, sub_kategori, kegiatan,
+  DATE_FORMAT(tanggal,'%Y-%m-%dT%H:%i:%sZ') AS tanggal, poin AS poin, status, deskripsi, file_name, file_path
+  FROM softskills WHERE nim=? ORDER BY tanggal DESC");
+$stmt->bind_param('s',$nim); $stmt->execute();
+$res=$stmt->get_result(); $out=[]; while($r=$res->fetch_assoc()){$out[]=$r;} respond_json($out,200);
