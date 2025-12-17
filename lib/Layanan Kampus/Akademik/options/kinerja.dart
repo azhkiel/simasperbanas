@@ -5,10 +5,10 @@ class Kinerja extends StatefulWidget {
   final List<Map<String, String>> mataKuliah;
 
   const Kinerja({
-    Key? key,
+    super.key,
     required this.userData,
     required this.mataKuliah,
-  }) : super(key: key);
+  });
 
   @override
   State<Kinerja> createState() => _KinerjaState();
@@ -523,10 +523,10 @@ class _KinerjaState extends State<Kinerja> with SingleTickerProviderStateMixin {
                     minWidth: MediaQuery.of(context).size.width - 32,
                   ),
                   child: DataTable(
-                    headingRowColor: MaterialStateProperty.resolveWith<Color?>(
+                    headingRowColor: WidgetStateProperty.resolveWith<Color?>(
                           (states) => Colors.grey.shade50,
                     ),
-                    dataRowColor: MaterialStateProperty.resolveWith<Color?>(
+                    dataRowColor: WidgetStateProperty.resolveWith<Color?>(
                           (states) => Colors.white,
                     ),
                     dataRowMinHeight: 52,
@@ -749,7 +749,7 @@ class _KinerjaState extends State<Kinerja> with SingleTickerProviderStateMixin {
                       minWidth: MediaQuery.of(context).size.width - 80,
                     ),
                     child: DataTable(
-                      headingRowColor: MaterialStateProperty.resolveWith<Color?>(
+                      headingRowColor: WidgetStateProperty.resolveWith<Color?>(
                             (states) => Colors.grey.shade50,
                       ),
                       dataRowMinHeight: 52,

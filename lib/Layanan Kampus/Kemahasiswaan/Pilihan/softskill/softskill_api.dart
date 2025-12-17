@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 class SoftSkillApi {
   Future<List<Map<String, dynamic>>> getByNim(String nim) async {
-    final r = await http.get(Uri.parse('${ApiConfig.baseUrl}/api.php?table=softskills&nim=$nim'));
+    final r = await http.get(Uri.parse('${ApiConfig.baseUrl}/api/api.php?table=softskills&nim=$nim'));
     if (r.statusCode != 200) throw Exception('GET ${r.statusCode}: ${r.body}');
     return (json.decode(r.body) as List).cast<Map<String, dynamic>>();
   }

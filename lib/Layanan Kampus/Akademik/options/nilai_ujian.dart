@@ -595,7 +595,7 @@ class _NilaiUjianState extends State<NilaiUjian> {
                         _buildNilaiCell(nilai['nilai'] ?? 'N/A'),
                       ],
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

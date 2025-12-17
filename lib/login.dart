@@ -31,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      final loginUrl = '${ApiConfig.baseUrl}${ApiConfig.login}';
+      final loginUrl = '${ApiConfig.baseUrl}/api/${ApiConfig.login}';
       debugPrint('Mencoba login ke: $loginUrl');
 
       final response = await http.post(

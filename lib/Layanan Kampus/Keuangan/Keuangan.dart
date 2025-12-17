@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../widgets/custom_app_bar.dart';
-import 'dart:ui' as ui;
 
 class KeuanganScreen extends StatelessWidget {
   const KeuanganScreen({super.key});

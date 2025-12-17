@@ -682,8 +682,8 @@ class _PerpustakaanPageState extends State<PerpustakaanPage> with SingleTickerPr
                 dataRowMaxHeight: 45,
                 columnSpacing: 0, // Mengurangi spacing antar kolom
                 horizontalMargin: 0, // Menghapus margin horizontal
-                headingRowColor: MaterialStateProperty.resolveWith<Color?>(
-                        (Set<MaterialState> states) {
+                headingRowColor: WidgetStateProperty.resolveWith<Color?>(
+                        (Set<WidgetState> states) {
                       return const Color(0xFF2D7BC4); // Warna biru untuk header
                     }),
                 columns: <DataColumn>[
@@ -784,7 +784,7 @@ class _PerpustakaanPageState extends State<PerpustakaanPage> with SingleTickerPr
                   final rowColor = (index % 2 != 0) ? Colors.white : Colors.grey[50];
 
                   return DataRow(
-                    color: MaterialStateProperty.all(rowColor),
+                    color: WidgetStateProperty.all(rowColor),
                     cells: <DataCell>[
                       // 1. No
                       DataCell(SizedBox(
@@ -1015,7 +1015,7 @@ class BookDetailPage extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "Detail ${tabName}",
+                "Detail $tabName",
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,

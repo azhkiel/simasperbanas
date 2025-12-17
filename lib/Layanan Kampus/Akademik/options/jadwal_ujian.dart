@@ -54,10 +54,10 @@ class _JadwalUjianState extends State<JadwalUjian> {
     print('=== DEBUG JADWAL UJIAN ===');
     print('NIM: $nim');
     print('KRS History: ${widget.krsHistory}');
-    print('KRS History length: ${widget.krsHistory?.length}');
+    print('KRS History length: ${widget.krsHistory.length}');
 
-    if (widget.krsHistory != null && widget.krsHistory!.isNotEmpty) {
-      final latestKRS = widget.krsHistory!.first;
+    if (widget.krsHistory.isNotEmpty) {
+      final latestKRS = widget.krsHistory.first;
       _selectedSemester = latestKRS['semester']?.toString() ?? 'Gasal';
       _selectedTahunAkademik = latestKRS['tahun_akademik']?.toString() ?? '2025/2026';
       print('Selected from KRS: Semester $_selectedSemester, Tahun $_selectedTahunAkademik');
@@ -295,7 +295,7 @@ class _JadwalUjianState extends State<JadwalUjian> {
           ),
           const SizedBox(height: 20),
           if (hasJadwal) ...[
-            ..._mataKuliahUjian.map((matkul) => _buildJadwalItem(matkul)).toList(),
+            ..._mataKuliahUjian.map((matkul) => _buildJadwalItem(matkul)),
           ] else ...[
             _buildEmptyState(),
           ],

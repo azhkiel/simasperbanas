@@ -97,7 +97,7 @@ void _loadUserData() async {
             child: Text('PERNYATAAN KESESUAIAN DATA', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
           const SizedBox(height: 12),
-          ...activities.map((a) => _ActivityCard(activity: a)).toList(),
+          ...activities.map((a) => _ActivityCard(activity: a)),
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,

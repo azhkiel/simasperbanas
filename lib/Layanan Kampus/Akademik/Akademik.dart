@@ -842,11 +842,11 @@ class _AkademikState extends State<Akademik>
               ),
               ElevatedButton(
                 onPressed: _initializeKRSData,
-                child: Text('Force Refresh'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   foregroundColor: Colors.white,
                 ),
+                child: Text('Force Refresh'),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -858,11 +858,11 @@ class _AkademikState extends State<Akademik>
                   debugPrint("_isLoading: $_isLoading");
                   debugPrint("_krsSudahDiambil: $_krsSudahDiambil");
                 },
-                child: Text('Print Debug'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
                 ),
+                child: Text('Print Debug'),
               ),
             ],
           ),
@@ -1398,7 +1398,7 @@ class _AkademikState extends State<Akademik>
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '${_totalSksDiambil}/$_sksMaksimal',
+              '$_totalSksDiambil/$_sksMaksimal',
               style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 12,

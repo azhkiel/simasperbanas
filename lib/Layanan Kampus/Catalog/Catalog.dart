@@ -324,7 +324,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
         final dynamic decodedBody = json.decode(response.body);
 
         // 1. Cek respons kosong atau tidak valid (misal, API mengembalikan string error, bukan JSON List)
-        if (decodedBody == null || !(decodedBody is List)) {
+        if (decodedBody == null || decodedBody is! List) {
           _showWarningSnackBar("API Tugas Akhir 200 OK, tetapi respons datanya kosong/tidak dalam format List JSON. Cek output PHP.");
           if (mounted) {
             setState(() {
@@ -336,7 +336,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
           return;
         }
 
-        final List<dynamic> jsonResponse = decodedBody as List<dynamic>;
+        final List<dynamic> jsonResponse = decodedBody;
 
         final List<Map<String, dynamic>> mappedData = jsonResponse.map((item) {
           // Fungsi bantu untuk mengambil nilai, mencoba key lowercase, lalu key capitalized, lalu alternatif key
@@ -1156,7 +1156,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
           const Text(
             "SEMESTER GASAL TAHUN 2025 / 2026",
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF1A365D)),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF1A365D)),
           ),
           const SizedBox(height: 20),
 
@@ -1244,7 +1244,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
               dataRowMaxHeight: 80.0,
               headingRowHeight: 40.0,
               border: TableBorder.all(color: const Color(0xFFE0E0E0), width: 1.0),
-              headingRowColor: MaterialStateProperty.resolveWith((states) => const Color(0xFF2D7BC4)),
+              headingRowColor: WidgetStateProperty.resolveWith((states) => const Color(0xFF2D7BC4)),
 
               columns: const <DataColumn>[
                 DataColumn(
@@ -1407,7 +1407,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
               dataRowMaxHeight: 80.0,
               headingRowHeight: 40.0,
               border: TableBorder.all(color: const Color(0xFFE0E0E0), width: 1.0),
-              headingRowColor: MaterialStateProperty.resolveWith((states) => const Color(0xFF2D7BC4)),
+              headingRowColor: WidgetStateProperty.resolveWith((states) => const Color(0xFF2D7BC4)),
 
               columns: const <DataColumn>[
                 DataColumn(
@@ -1556,7 +1556,7 @@ class _CatalogPageState extends State<CatalogPage> with TickerProviderStateMixin
               dataRowMaxHeight: 55.0,
               headingRowHeight: 40.0,
               border: TableBorder.all(color: const Color(0xFFE0E0E0), width: 1.0),
-              headingRowColor: MaterialStateProperty.resolveWith((states) => const Color(0xFF2D7BC4)),
+              headingRowColor: WidgetStateProperty.resolveWith((states) => const Color(0xFF2D7BC4)),
 
               columns: const <DataColumn>[
                 DataColumn(
@@ -1789,7 +1789,7 @@ class BookDetailPage extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "Detail ${tabName}",
+                "Detail $tabName",
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,

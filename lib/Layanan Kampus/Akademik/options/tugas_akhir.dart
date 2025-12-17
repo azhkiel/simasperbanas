@@ -8,8 +8,7 @@ class TugasAkhir extends StatefulWidget {
   final Map<String, dynamic> userData;
   final List<Map<String, dynamic>> mataKuliah;
 
-  const TugasAkhir({Key? key, required this.userData, required this.mataKuliah})
-    : super(key: key);
+  const TugasAkhir({super.key, required this.userData, required this.mataKuliah});
 
   @override
   State<TugasAkhir> createState() => _TugasAkhirState();

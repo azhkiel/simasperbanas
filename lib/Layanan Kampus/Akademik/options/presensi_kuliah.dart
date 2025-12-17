@@ -7,9 +7,9 @@ class PresensiKuliah extends StatefulWidget {
   final Map<String, dynamic> userData;
 
   const PresensiKuliah({
-    Key? key,
+    super.key,
     required this.userData,
-  }) : super(key: key);
+  });
 
   @override
   State<PresensiKuliah> createState() => _PresensiKuliahState();
@@ -696,12 +696,12 @@ class DetailPresensiModal extends StatelessWidget {
   final Map<String, dynamic> userData;
 
   const DetailPresensiModal({
-    Key? key,
+    super.key,
     required this.mataKuliah,
     required this.presensiStats,
     required this.presensiHistory,
     required this.userData,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1179,7 +1179,7 @@ class DetailPresensiModal extends StatelessWidget {
                 ],
               ),
             );
-          }).toList(),
+          }),
       ],
     );
   }

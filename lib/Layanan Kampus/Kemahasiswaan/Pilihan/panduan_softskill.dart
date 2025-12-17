@@ -37,7 +37,7 @@ class _PanduanSoftSkillPageState extends State<PanduanSoftSkillPage> {
               const SizedBox(width: 80, child: Text('Unsur :', style: TextStyle(fontWeight: FontWeight.w600))),
               const SizedBox(width: 8),
               Expanded(child: DropdownButtonFormField<String>(
-                value: selectedUnsur, decoration: _dec(),
+                initialValue: selectedUnsur, decoration: _dec(),
                 items: unsurList.map((e)=>DropdownMenuItem(value:e, child: Text(e))).toList(),
                 onChanged: (v)=>setState(()=>selectedUnsur = v),
               )),

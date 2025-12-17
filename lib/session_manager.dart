@@ -67,11 +67,16 @@ class SessionManager {
     await prefs.remove(_nimKey);
     await prefs.remove(_namaKey);
     await prefs.remove(_emailKey);
-    await prefs.remove(_roleKey);
+    await prefs.remove(_roleKey); 
     
     await prefs.reload();
   }
-
+  static Future<int?> getIdUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final id = prefs.getString(_idUserKey);
+    if (id == null || id.isEmpty) return null;
+    return int.tryParse(id);
+  }
   // Cek apakah user sudah login
   static Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();

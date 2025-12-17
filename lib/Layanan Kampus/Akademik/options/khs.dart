@@ -194,7 +194,7 @@ class _KHSState extends State<KHS> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Menampilkan KHS ${_selectedTahunAkademik} Semester ${_selectedSemester}'),
+          content: Text('Menampilkan KHS $_selectedTahunAkademik Semester $_selectedSemester'),
           backgroundColor: Colors.green[600],
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -536,7 +536,7 @@ class _KHSState extends State<KHS> {
               ),
               const Spacer(),
               Text(
-                '${_selectedTahunAkademik} - ${_selectedSemester}',
+                '$_selectedTahunAkademik - $_selectedSemester',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 12,
@@ -920,7 +920,7 @@ class _KHSState extends State<KHS> {
                         _buildTableCell(khs['bobot']?.toStringAsFixed(2) ?? '0.00', isCenter: true),
                       ],
                     );
-                  }).toList(),
+                  }),
                   // Total Row
                   TableRow(
                     decoration: BoxDecoration(
