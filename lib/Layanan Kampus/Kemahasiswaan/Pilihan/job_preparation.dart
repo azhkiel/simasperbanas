@@ -321,18 +321,21 @@ for (final k in kesehatan) {
       );
     }
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [primaryBlue, secondaryBlue],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: SafeArea(
-          bottom: false,
-          child: Center(
+return Scaffold(
+  body: Container(
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        colors: [primaryBlue, secondaryBlue],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+    ),
+    child: SafeArea(
+      bottom: false,
+      child: Stack(
+        children: [
+          // Konten utama yang bisa di-scroll
+          Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1100),
               child: SingleChildScrollView(
@@ -345,7 +348,6 @@ for (final k in kesehatan) {
                     children: [
                       _buildHeader(),
                       const SizedBox(height: 16),
-
                       // SECTION 1: Identitas Pribadi
                       _section(
                         'I. Identitas Pribadi',
@@ -354,8 +356,6 @@ for (final k in kesehatan) {
                           decoration: _dec,
                         ),
                       ),
-
-
                       // SECTION 2: Pendidikan Formal
                       _section(
                         'II. Pendidikan Formal',
@@ -364,7 +364,6 @@ for (final k in kesehatan) {
                           decoration: _dec,
                         ),
                       ),
-                      // Setelah section Pendidikan Formal
                       _section(
                         'III. Pendidikan Non-Formal',
                         PendidikanNonFormalSection(
@@ -372,84 +371,79 @@ for (final k in kesehatan) {
                           decoration: _dec,
                         ),
                       ),
-                      // Setelah Pendidikan Non-Formal
-                    _section(
-                      'IV. Bahasa Asing',
-                      BahasaAsingSection(
-                        controllers: _ctrl,
-                        decoration: _dec,
+                      _section(
+                        'IV. Bahasa Asing',
+                        BahasaAsingSection(
+                          controllers: _ctrl,
+                          decoration: _dec,
+                        ),
                       ),
-                    ),
-
-                    _section(
-                      'V. Keterampilan Komputer',
-                      KeterampilanKomputerSection(
-                        controllers: _ctrl,
-                        decoration: _dec,
+                      _section(
+                        'V. Keterampilan Komputer',
+                        KeterampilanKomputerSection(
+                          controllers: _ctrl,
+                          decoration: _dec,
+                        ),
                       ),
-                    ),
-                    // Setelah Keterampilan Komputer
-_section(
-  'VI. Pengalaman Kerja',
-  PengalamanKerjaSection(
-    controllers: _ctrl,
-    decoration: _dec,
-  ),
-),
-
-_section(
-  'VII. Organisasi',
-  OrganisasiSection(
-    controllers: _ctrl,
-    decoration: _dec,
-  ),
-),
-_section(
-  'VIII. Kontak Darurat',
-  KontakDaruratSection(
-    controllers: _ctrl,
-    decoration: _dec,
-  ),
-),
-_section(
-  'IX. Referensi',
-  ReferensiSection(
-    controllers: _ctrl,
-    decoration: _dec,
-  ),
-),
-// Setelah Organisasi
-_section(
-  'VIII. Preferensi Pekerjaan',
-  PreferensiPekerjaanSection(
-    controllers: _ctrl,
-    decoration: _dec,
-  ),
-),
-
-_section(
-  'IX. Riwayat Kesehatan',
-  KesehatanSection(
-    controllers: _ctrl,
-    decoration: _dec,
-  ),
-),
-                      // TODO: Tambahkan section lainnya...
-
-                      const SizedBox(height: 8),
-                      _buildSubmitButton(),
+                      _section(
+                        'VI. Pengalaman Kerja',
+                        PengalamanKerjaSection(
+                          controllers: _ctrl,
+                          decoration: _dec,
+                        ),
+                      ),
+                      _section(
+                        'VII. Organisasi',
+                        OrganisasiSection(
+                          controllers: _ctrl,
+                          decoration: _dec,
+                        ),
+                      ),
+                      _section(
+                        'VIII. Kontak Darurat',
+                        KontakDaruratSection(
+                          controllers: _ctrl,
+                          decoration: _dec,
+                        ),
+                      ),
+                      _section(
+                        'IX. Referensi',
+                        ReferensiSection(
+                          controllers: _ctrl,
+                          decoration: _dec,
+                        ),
+                      ),
+                      _section(
+                        'X. Preferensi Pekerjaan',
+                        PreferensiPekerjaanSection(
+                          controllers: _ctrl,
+                          decoration: _dec,
+                        ),
+                      ),
+                      _section(
+                        'XI. Riwayat Kesehatan',
+                        KesehatanSection(
+                          controllers: _ctrl,
+                          decoration: _dec,
+                        ),
+                      ),
+                      const SizedBox(height: 100), // Beri ruang untuk tombol floating
                     ],
                   ),
                 ),
               ),
             ),
           ),
-        ),
+          // Tombol floating di pojok kiri bawah
+          _buildSubmitButton(),
+        ],
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 
-  Widget _buildHeader() {
+Widget _buildHeader() {
     return Card(
       elevation: 10,
       shadowColor: Colors.black.withOpacity(0.18),
@@ -461,15 +455,16 @@ _section(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
+          borderRadius: BorderRadius.all(Radius.circular(18)),
         ),
         padding: const EdgeInsets.all(20),
         child: Row(
           children: [
             Row(
               children: [
-                _buildLogo('UHW'),
+                _buildLogo('assets/images/logo_uhw.png'), // Ganti dengan path logo UHW
                 const SizedBox(width: 12),
-                _buildLogo('IACBE', fontSize: 10),
+                _buildLogo('assets/images/LogoIACBE.png'), // Ganti dengan path logo IACBE
               ],
             ),
             const SizedBox(width: 16),
@@ -505,7 +500,7 @@ _section(
     );
   }
 
-  Widget _buildLogo(String text, {double fontSize = 14}) {
+  Widget _buildLogo(String imagePath) {
     return Container(
       height: 52,
       width: 52,
@@ -513,13 +508,21 @@ _section(
         borderRadius: BorderRadius.circular(12),
         color: Colors.white.withOpacity(0.15),
       ),
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: fontSize,
-            color: Colors.white,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Image.asset(
+            imagePath,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              // Fallback jika gambar tidak ditemukan
+              return const Icon(
+                Icons.image_not_supported,
+                color: Colors.white,
+                size: 24,
+              );
+            },
           ),
         ),
       ),
@@ -527,21 +530,24 @@ _section(
   }
 
   Widget _buildSubmitButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
+    return Positioned(
+      left: 16,
+      bottom: 16,
+      child: FloatingActionButton.extended(
         onPressed: _submit,
-        icon: const Icon(Icons.save, size: 18),
-        label: const Text('Simpan'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: sectionHeader,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          textStyle: const TextStyle(fontWeight: FontWeight.w600),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        icon: const Icon(Icons.save, size: 20),
+        label: const Text(
+          'Simpan',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
           ),
-          elevation: 8,
+        ),
+        backgroundColor: sectionHeader,
+        foregroundColor: Colors.white,
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
     );

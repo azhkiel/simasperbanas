@@ -22,23 +22,7 @@ class _BahasaAsingSectionState extends State<BahasaAsingSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHeaderRow(),
-        const SizedBox(height: 12),
-
-        // Entry 1
-        _buildBahasaRow(0),
-        const SizedBox(height: 12),
-
-        // Entry 2
-        _buildBahasaRow(1),
-        const SizedBox(height: 12),
-
-        // Entry 3
-        _buildBahasaRow(2),
-
-        const SizedBox(height: 16),
-
-        // Info
+        // Info di atas
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
@@ -59,110 +43,180 @@ class _BahasaAsingSectionState extends State<BahasaAsingSection> {
             ],
           ),
         ),
+        const SizedBox(height: 16),
+
+        // Entry 1
+        _buildBahasaRow(0),
+        const SizedBox(height: 16),
+
+        // Entry 2
+        _buildBahasaRow(1),
+        const SizedBox(height: 16),
+
+        // Entry 3
+        _buildBahasaRow(2),
       ],
     );
   }
 
-  Widget _buildHeaderRow() {
-    const hStyle = TextStyle(fontSize: 11, fontWeight: FontWeight.w600);
+  Widget _buildBahasaRow(int index) {
+    return Card(
+      elevation: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Text(
+              'Bahasa Asing ${index + 1}',
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 12),
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          SizedBox(width: 120, child: Text('BAHASA', style: hStyle)),
-          const SizedBox(width: 8),
-          SizedBox(width: 100, child: Text('TERTULIS', style: hStyle)),
-          const SizedBox(width: 8),
-          SizedBox(width: 100, child: Text('LISAN', style: hStyle)),
-          const SizedBox(width: 8),
-          SizedBox(width: 200, child: Text('KETERANGAN', style: hStyle)),
-        ],
+            // Nama Bahasa
+            TextFormField(
+              controller: widget.controllers.bahasa[index],
+              decoration: widget.decoration(
+                hint: 'Nama Bahasa (contoh: Inggris, Mandarin)',
+                icon: Icons.language,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Layout Responsif untuk Penguasaan
+            LayoutBuilder(
+              builder: (context, constraints) {
+                // Jika lebar cukup besar, gunakan Row
+                if (constraints.maxWidth > 600) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Penguasaan Tertulis
+                      Expanded(
+                        child: _buildDropdown(
+                          label: 'Penguasaan Tertulis',
+                          value: widget.controllers.bahasaTertulis[index],
+                          icon: Icons.edit_note,
+                          onChanged: (v) {
+                            setState(() {
+                              widget.controllers.bahasaTertulis[index] = v;
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+
+                      // Penguasaan Lisan
+                      Expanded(
+                        child: _buildDropdown(
+                          label: 'Penguasaan Lisan',
+                          value: widget.controllers.bahasaLisan[index],
+                          icon: Icons.record_voice_over,
+                          onChanged: (v) {
+                            setState(() {
+                              widget.controllers.bahasaLisan[index] = v;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  // Jika lebar sempit, gunakan Column
+                  return Column(
+                    children: [
+                      _buildDropdown(
+                        label: 'Penguasaan Tertulis',
+                        value: widget.controllers.bahasaTertulis[index],
+                        icon: Icons.edit_note,
+                        onChanged: (v) {
+                          setState(() {
+                            widget.controllers.bahasaTertulis[index] = v;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      _buildDropdown(
+                        label: 'Penguasaan Lisan',
+                        value: widget.controllers.bahasaLisan[index],
+                        icon: Icons.record_voice_over,
+                        onChanged: (v) {
+                          setState(() {
+                            widget.controllers.bahasaLisan[index] = v;
+                          });
+                        },
+                      ),
+                    ],
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 12),
+
+            // Keterangan
+            TextFormField(
+              controller: widget.controllers.bahasaKeterangan[index],
+              decoration: widget.decoration(
+                hint: 'Keterangan (contoh: TOEFL 500, Sertifikat HSK)',
+                icon: Icons.description,
+              ),
+              maxLines: 2,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildBahasaRow(int index) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Bahasa Asing ${index + 1}',
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+  Widget _buildDropdown({
+    required String label,
+    required String? value,
+    required IconData icon,
+    required Function(String?) onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.black54,
           ),
-          const SizedBox(height: 6),
-
-          // Nama Bahasa
-          TextFormField(
-            controller: widget.controllers.bahasa[index],
-            decoration: widget.decoration(
-              hint: 'Nama Bahasa (contoh: Inggris, Mandarin)',
-              icon: Icons.language,
+        ),
+        const SizedBox(height: 4),
+        DropdownButtonFormField<String>(
+          value: value,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
             ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            prefixIcon: Icon(icon, size: 20),
+            isDense: true,
           ),
-          const SizedBox(height: 8),
-
-          // Row untuk Tertulis, Lisan, Keterangan
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Penguasaan Tertulis
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: widget.controllers.bahasaTertulis[index],
-                  decoration: widget.decoration(
-                    hint: 'Tertulis',
-                    icon: Icons.edit_note,
-                  ),
-                  items: aktifPasifOptions
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (v) {
-                    setState(() {
-                      widget.controllers.bahasaTertulis[index] = v;
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-
-              // Penguasaan Lisan
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: widget.controllers.bahasaLisan[index],
-                  decoration: widget.decoration(
-                    hint: 'Lisan',
-                    icon: Icons.record_voice_over,
-                  ),
-                  items: aktifPasifOptions
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (v) {
-                    setState(() {
-                      widget.controllers.bahasaLisan[index] = v;
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-
-              // Keterangan
-              Expanded(
-                flex: 2,
-                child: TextFormField(
-                  controller: widget.controllers.bahasaKeterangan[index],
-                  decoration: widget.decoration(
-                    hint: 'Keterangan (contoh: TOEFL 500)',
-                    icon: Icons.description,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+          isExpanded: true, // ⭐ PENTING: Agar dropdown tidak overflow
+          items: aktifPasifOptions
+              .map((e) => DropdownMenuItem(
+                    value: e,
+                    child: Text(
+                      e,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ))
+              .toList(),
+          onChanged: onChanged,
+        ),
+      ],
     );
   }
 }

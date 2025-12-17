@@ -5,24 +5,43 @@ import '/services/api_config.dart';
 import './controllers.dart';
 
 class JobPreparationService {
-  static Future<Map<String, dynamic>?> fetchAll() async {
-    final int? idUser = await SessionManager.getIdUser();
-    if (idUser == null) return null;
+static Future<Map<String, dynamic>?> fetchAll() async {
+  final int? idUser = await SessionManager.getIdUser();
+  if (idUser == null) return null;
 
+  try {
     final response = await http.get(
       Uri.parse(
         '${ApiConfig.baseUrl}/job_preparation/read_all.php?id_user=$idUser',
       ),
     );
 
-    if (response.statusCode != 200) return null;
+    // Cek status code
+    if (response.statusCode != 200) {
+      print('Error: Status code ${response.statusCode}');
+      return null;
+    }
+
+    // ⭐ Cek apakah body kosong
+    if (response.body.isEmpty) {
+      print('Error: Response body is empty');
+      return null;
+    }
+
+    // Debug: Print response body
+    print('Response body: ${response.body}');
 
     final result = jsonDecode(response.body);
 
     if (result['status'] != 'success') return null;
 
     return result['data'];
+    
+  } catch (e) {
+    print('Error in fetchAll: $e');
+    return null;
   }
+}
 
 static Future<bool> submit(int idUser, JobPreparationControllers c) async {
   final payload = {
@@ -47,6 +66,7 @@ static Future<bool> submit(int idUser, JobPreparationControllers c) async {
     'suku': c.sukuBangsa.text,
     'no_ktp': c.noKtp.text,
     'berlaku_hingga': c.berlakuHingga.text,
+    
 
     'pendidikan_formal': [
       {
@@ -195,8 +215,14 @@ static Future<bool> submit(int idUser, JobPreparationControllers c) async {
       'keterangan': c.kecelakaanApa.text,
       'akibat': c.kecelakaanAkibat.text,
     },
+    
   ],
+  
   };
+  print('=== PAYLOAD DEBUG ===');
+  print('no_ktp: ${c.noKtp.text}');
+  print('no_ktp type: ${c.noKtp.text.runtimeType}');
+  print('payload: ${jsonEncode(payload)}');
 
   final res = await http.post(
     Uri.parse('${ApiConfig.baseUrl}/job_preparation/save.php'), // ✅ Fixed
@@ -206,4 +232,6 @@ static Future<bool> submit(int idUser, JobPreparationControllers c) async {
 
   final json = jsonDecode(res.body);
   return json['status'] == 'success';
-}}
+  
+  }
+}
