@@ -46,9 +46,9 @@ try {
             INSERT INTO job_preparations
             (id_user, nama_lengkap, nama_panggilan, nim, email, tempat_lahir, tanggal_lahir,
             alamat_surabaya, alamat_luar, provinsi, kota, no_hp, jenis_kelamin, agama,
-            status_perkawinan, golongan_darah, tinggi_badan, berat_badan, suku, no_ktp,
-            berlaku_hingga, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            status_perkawinan, memakai_kacamata, kewarganegaraan, golongan_darah, 
+            tinggi_badan, berat_badan, suku, no_ktp, berlaku_hingga, foto_path, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         ");
         $stmt->execute([
             $id_user,
@@ -66,12 +66,15 @@ try {
             $data['jenis_kelamin'] ?? null,
             $data['agama'] ?? '',
             $data['status_perkawinan'] ?? '',
+            $data['memakai_kacamata'] ?? null, // ⭐ TAMBAHKAN
+            $data['kewarganegaraan'] ?? null,  // ⭐ TAMBAHKAN
             $data['golongan_darah'] ?? '',
             $data['tinggi_badan'] ?? null,
             $data['berat_badan'] ?? null,
             $data['suku'] ?? '',
             $no_ktp_encrypted,
             $data['berlaku_hingga'] ?? null,
+            $data['foto_path'] ?? null,        // ⭐ TAMBAHKAN
         ]);
         
         $jobId = $db->lastInsertId();
@@ -84,8 +87,9 @@ try {
             tempat_lahir = ?, tanggal_lahir = ?, alamat_surabaya = ?,
             alamat_luar = ?, provinsi = ?, kota = ?, no_hp = ?,
             jenis_kelamin = ?, agama = ?, status_perkawinan = ?,
-            golongan_darah = ?, tinggi_badan = ?, berat_badan = ?,
-            suku = ?, no_ktp = ?, berlaku_hingga = ?,
+            memakai_kacamata = ?, kewarganegaraan = ?, golongan_darah = ?, 
+            tinggi_badan = ?, berat_badan = ?,
+            suku = ?, no_ktp = ?, berlaku_hingga = ?, foto_path = ?,
             updated_at = NOW()
             WHERE id = ?
         ");
@@ -104,12 +108,15 @@ try {
             $data['jenis_kelamin'] ?? null,
             $data['agama'] ?? '',
             $data['status_perkawinan'] ?? '',
+            $data['memakai_kacamata'] ?? null,
+            $data['kewarganegaraan'] ?? null,
             $data['golongan_darah'] ?? '',
             $data['tinggi_badan'] ?? null,
             $data['berat_badan'] ?? null,
             $data['suku'] ?? '',
             $no_ktp_encrypted,
             $data['berlaku_hingga'] ?? null,
+            $data['foto_path'] ?? null, 
             $jobId
         ]);
         

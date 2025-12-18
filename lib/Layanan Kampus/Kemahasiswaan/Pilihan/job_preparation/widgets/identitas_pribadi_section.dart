@@ -532,7 +532,7 @@ class _IdentitasPribadiSectionState extends State<IdentitasPribadiSection> {
                     ? widget.controllers.memakaiKacamata 
                     : null,
                 decoration: widget.decoration(
-                  hint: 'Kacamata', // ⭐ Persingkat hint
+                  hint: 'Kacamata', 
                   icon: Icons.visibility,
                 ),
                 items: yaTidakOptions

@@ -91,6 +91,7 @@ CREATE TABLE `job_preparations` (
   `suku` varchar(100) DEFAULT NULL,
   `no_ktp` varchar(255) DEFAULT NULL,
   `berlaku_hingga` date DEFAULT NULL,
+  `foto_path` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
