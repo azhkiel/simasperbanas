@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:typed_data';
 
 class JobPreparationControllers {
   // I. IDENTITAS PRIBADI
@@ -19,6 +20,8 @@ class JobPreparationControllers {
   final noKtp = TextEditingController();
   final berlakuHingga = TextEditingController();
 
+  String? fotoPath;
+  Uint8List? fotoBytes;
   String? jk;
   String? agama;
   String? statusPerkawinan;

@@ -12,6 +12,8 @@ import './job_preparation/widgets/organisasi_section.dart';
 import './job_preparation/widgets/referensi_section.dart';
 import './job_preparation/widgets/preferensi_pekerjaan_section.dart';
 import './job_preparation/widgets/kesehatan_section.dart';
+import 'package:http/http.dart' as http;
+import '/../services/api_config.dart';
 import './job_preparation/job_preparation_service.dart';
 import '../../../../session_manager.dart';
 
@@ -45,182 +47,213 @@ class _JobPreparationPageState extends State<JobPreparationPage> {
 
     final job = data['job_preparation'];
     setState(() {
-    _ctrl.nama.text = job['nama_lengkap'] ?? '';
-    _ctrl.namaPanggilan.text = job['nama_panggilan'] ?? '';
-    _ctrl.nim.text = job['nim'] ?? '';
-    _ctrl.email.text = job['email'] ?? '';
-    _ctrl.tempatLahir.text = job['tempat_lahir'] ?? '';
-    _ctrl.tanggalLahir.text = job['tanggal_lahir'] ?? '';
-    _ctrl.alamatSby.text = job['alamat_surabaya'] ?? '';
-    _ctrl.alamatLuar.text = job['alamat_luar'] ?? '';
-    _ctrl.provinsi.text = job['provinsi'] ?? '';
-    _ctrl.kotaKabupaten.text = job['kota'] ?? '';
-    _ctrl.noHp.text = job['no_hp'] ?? '';
-    _ctrl.tinggiBadan.text = job['tinggi_badan']?.toString() ?? '';
-    _ctrl.beratBadan.text = job['berat_badan']?.toString() ?? '';
-    _ctrl.sukuBangsa.text = job['suku'] ?? '';
-    _ctrl.noKtp.text = job['no_ktp'] ?? '';
-    _ctrl.berlakuHingga.text = job['berlaku_hingga'] ?? '';
+      _ctrl.nama.text = job['nama_lengkap'] ?? '';
+      _ctrl.namaPanggilan.text = job['nama_panggilan'] ?? '';
+      _ctrl.nim.text = job['nim'] ?? '';
+      _ctrl.email.text = job['email'] ?? '';
+      _ctrl.tempatLahir.text = job['tempat_lahir'] ?? '';
+      _ctrl.tanggalLahir.text = job['tanggal_lahir'] ?? '';
+      _ctrl.alamatSby.text = job['alamat_surabaya'] ?? '';
+      _ctrl.alamatLuar.text = job['alamat_luar'] ?? '';
+      _ctrl.provinsi.text = job['provinsi'] ?? '';
+      _ctrl.kotaKabupaten.text = job['kota'] ?? '';
+      _ctrl.noHp.text = job['no_hp'] ?? '';
+      _ctrl.tinggiBadan.text = job['tinggi_badan']?.toString() ?? '';
+      _ctrl.beratBadan.text = job['berat_badan']?.toString() ?? '';
+      _ctrl.sukuBangsa.text = job['suku'] ?? '';
+      _ctrl.noKtp.text = job['no_ktp'] ?? '';
+      _ctrl.berlakuHingga.text = job['berlaku_hingga'] ?? '';
+      _ctrl.memakaiKacamata = job['memakai_kacamata'];
+      _ctrl.kewarganegaraan = job['kewarganegaraan'];
+      _ctrl.fotoPath = job['foto_path'];
 
-    // DROPDOWN
-    _ctrl.jk = job['jenis_kelamin'];
-    _ctrl.agama = job['agama'];
-    _ctrl.statusPerkawinan = job['status_perkawinan'];
-    _ctrl.golonganDarah = job['golongan_darah'];
-    final formal = data['pendidikan_formal'] ?? [];
+      // DROPDOWN
+      _ctrl.jk = job['jenis_kelamin'];
+      _ctrl.agama = job['agama'];
+      _ctrl.statusPerkawinan = job['status_perkawinan'];
+      _ctrl.golonganDarah = job['golongan_darah'];
+      final formal = data['pendidikan_formal'] ?? [];
+      for (final f in formal) {
+        print(
+          '${f['jenjang']} - ${f['tahun_mulai']} (${f['tahun_mulai'].runtimeType})',
+        );
+        switch (f['jenjang']) {
+          case 'SD':
+            _ctrl.sdNama.text = f['nama_institusi'] ?? '';
+            _ctrl.sdTahunMulai.text = f['tahun_mulai']?.toString() ?? '';
+            _ctrl.sdTahunSelesai.text = f['tahun_selesai']?.toString() ?? '';
+            _ctrl.sdJurusan.text = f['jurusan'] ?? '';
+            _ctrl.sdPrestasi.text = f['prestasi'] ?? '';
+            break;
 
-for (final f in formal) {
-  print('${f['jenjang']} - ${f['tahun_mulai']} (${f['tahun_mulai'].runtimeType})');
-  switch (f['jenjang']) {
-  case 'SD':
-    _ctrl.sdNama.text = f['nama_institusi'] ?? '';
-    _ctrl.sdTahunMulai.text = f['tahun_mulai']?.toString() ?? '';
-    _ctrl.sdTahunSelesai.text = f['tahun_selesai']?.toString() ?? '';
-    _ctrl.sdJurusan.text = f['jurusan'] ?? '';
-    _ctrl.sdPrestasi.text = f['prestasi'] ?? '';
-    break;
+          case 'SLTP':
+            _ctrl.smpNama.text = f['nama_institusi'] ?? '';
+            _ctrl.smpTahunMulai.text = f['tahun_mulai']?.toString() ?? '';
+            _ctrl.smpTahunSelesai.text = f['tahun_selesai']?.toString() ?? '';
+            _ctrl.smpJurusan.text = f['jurusan'] ?? '';
+            _ctrl.smpPrestasi.text = f['prestasi'] ?? '';
+            break;
 
-  case 'SLTP':
-    _ctrl.smpNama.text = f['nama_institusi'] ?? '';
-    _ctrl.smpTahunMulai.text = f['tahun_mulai']?.toString() ?? '';
-    _ctrl.smpTahunSelesai.text = f['tahun_selesai']?.toString() ?? '';
-    _ctrl.smpJurusan.text = f['jurusan'] ?? '';
-    _ctrl.smpPrestasi.text = f['prestasi'] ?? '';
-    break;
+          case 'SLTA':
+            _ctrl.smaNama.text = f['nama_institusi'] ?? '';
+            _ctrl.smaTahunMulai.text = f['tahun_mulai']?.toString() ?? '';
+            _ctrl.smaTahunSelesai.text = f['tahun_selesai']?.toString() ?? '';
+            _ctrl.smaJurusan.text = f['jurusan'] ?? '';
+            _ctrl.smaPrestasi.text = f['prestasi'] ?? '';
+            break;
 
-  case 'SLTA':
-    _ctrl.smaNama.text = f['nama_institusi'] ?? '';
-    _ctrl.smaTahunMulai.text = f['tahun_mulai']?.toString() ?? '';
-    _ctrl.smaTahunSelesai.text = f['tahun_selesai']?.toString() ?? '';
-    _ctrl.smaJurusan.text = f['jurusan'] ?? '';
-    _ctrl.smaPrestasi.text = f['prestasi'] ?? '';
-    break;
-
-  case 'UNIVERSITAS':
-    _ctrl.univNama.text = f['nama_institusi'] ?? '';
-    _ctrl.univTahunMulai.text = f['tahun_mulai']?.toString() ?? '';
-    _ctrl.univTahunSelesai.text = f['tahun_selesai']?.toString() ?? '';
-    _ctrl.univJurusan.text = f['jurusan'] ?? '';
-    _ctrl.univPrestasi.text = f['prestasi'] ?? '';
-    break;
-}
-
-  }
-  // Setelah loading pendidikan formal
-final nonFormal = data['pendidikan_non_formal'] ?? [];
-for (int i = 0; i < nonFormal.length && i < 3; i++) {
-  final nf = nonFormal[i];
-  _ctrl.nfNamaLembaga[i].text = nf['nama_lembaga'] ?? '';
-  _ctrl.nfAlamatLembaga[i].text = nf['alamat'] ?? '';
-  _ctrl.nfTahun[i].text = nf['tahun']?.toString() ?? '';
-  _ctrl.nfMateri[i].text = nf['materi'] ?? '';
-}
-// Setelah loading pendidikan non-formal
-final bahasaAsing = data['bahasa_asing'] ?? [];
-for (int i = 0; i < bahasaAsing.length && i < 3; i++) {
-  final ba = bahasaAsing[i];
-  _ctrl.bahasa[i].text = ba['bahasa'] ?? '';
-  _ctrl.bahasaTertulis[i] = ba['penguasaan_tertulis'];
-  _ctrl.bahasaLisan[i] = ba['penguasaan_lisan'];
-  _ctrl.bahasaKeterangan[i].text = ba['keterangan'] ?? '';
-}
-
-final komputer = data['keterampilan_komputer'];
-if (komputer != null) {
-  _ctrl.msWord = komputer['ms_word'] == 1;
-  _ctrl.msExcel = komputer['ms_excel'] == 1;
-  _ctrl.msPowerPoint = komputer['ms_powerpoint'] == 1;
-  _ctrl.sql = komputer['sql_skill'] == 1;
-  _ctrl.lan = komputer['lan'] == 1;
-  _ctrl.pascal = komputer['pascal'] == 1;
-  _ctrl.cLang = komputer['c_language'] == 1;
-  _ctrl.softwareLain = komputer['software_lain'] == 1;
-  _ctrl.keahlianKhusus.text = komputer['keahlian_khusus'] ?? '';
-  _ctrl.citaCita.text = komputer['cita_cita'] ?? '';
-  _ctrl.kegiatanWaktuLuang.text = komputer['kegiatan_waktu_luang'] ?? '';
-  _ctrl.hobby.text = komputer['hobby'] ?? '';
-}
-// Setelah loading keterampilan komputer
-final pengalamanKerja = data['pengalaman_kerja'] ?? [];
-for (int i = 0; i < pengalamanKerja.length && i < 3; i++) {
-  final pk = pengalamanKerja[i];
-  _ctrl.perNamaPerusahaan[i].text = pk['nama_perusahaan'] ?? '';
-  _ctrl.perAlamatPerusahaan[i].text = pk['alamat'] ?? '';
-  _ctrl.perLamaMulai[i].text = pk['mulai'] ?? '';
-  _ctrl.perLamaSelesai[i].text = pk['selesai'] ?? '';
-  _ctrl.perTelp[i].text = pk['telp'] ?? '';
-  _ctrl.perAtasan[i].text = pk['atasan'] ?? '';
-  _ctrl.perGaji[i].text = pk['gaji'] ?? '';
-  _ctrl.perUraianTugas[i].text = pk['uraian_tugas'] ?? '';
-  _ctrl.perAlasanBerhenti[i].text = pk['alasan_berhenti'] ?? '';
-}
-
-final organisasi = data['organisasi'] ?? [];
-for (int i = 0; i < organisasi.length && i < 3; i++) {
-  final org = organisasi[i];
-  _ctrl.orgNama[i].text = org['nama'] ?? '';
-  _ctrl.orgTempat[i].text = org['tempat'] ?? '';
-  _ctrl.orgSifat[i].text = org['sifat'] ?? '';
-  _ctrl.orgLama[i].text = org['lama'] ?? '';
-  _ctrl.orgJabatan[i].text = org['jabatan'] ?? '';
-}
-// Di method _loadFromApi(), setelah load organisasi:
-final kontakDarurat = data['kontak_darurat'] ?? [];
-for (int i = 0; i < kontakDarurat.length && i < 2; i++) {
-  final kd = kontakDarurat[i];
-  _ctrl.darNama[i].text = kd['nama'] ?? '';
-  _ctrl.darAlamat[i].text = kd['alamat'] ?? '';
-  _ctrl.darTelp[i].text = kd['telp'] ?? '';
-  _ctrl.darHubungan[i].text = kd['hubungan'] ?? '';
-}
-// Di method _loadFromApi(), setelah load kontak darurat:
-final referensi = data['referensi'] ?? [];
-for (int i = 0; i < referensi.length && i < 2; i++) {
-  final ref = referensi[i];
-  _ctrl.refNama[i].text = ref['nama'] ?? '';
-  _ctrl.refAlamat[i].text = ref['alamat'] ?? '';
-  _ctrl.refTelp[i].text = ref['telp'] ?? '';
-  _ctrl.refPekerjaan[i].text = ref['pekerjaan'] ?? '';
-  _ctrl.refHubungan[i].text = ref['hubungan'] ?? '';
-}
-// Setelah loading organisasi
-final preferensi = data['preferensi_pekerjaan'];
-if (preferensi != null) {
-  _ctrl.bersediaLembur = preferensi['bersedia_lembur'] == 1;
-  _ctrl.bersediaTugasLuarKota = preferensi['tugas_luar_kota'] == 1;
-  _ctrl.bersediaDitempatkanLuarKota = preferensi['ditempatkan_luar_kota'] == 1;
-  _ctrl.pekerjaanDisukai.text = preferensi['pekerjaan_disukai'] ?? '';
-  _ctrl.bidangDisukai.text = preferensi['bidang_disukai'] ?? '';
-  _ctrl.pekerjaanTidakDisukai.text = preferensi['pekerjaan_tidak_disukai'] ?? '';
-  _ctrl.bidangTidakDisukai.text = preferensi['bidang_tidak_disukai'] ?? '';
-  _ctrl.pernahPsikotes = preferensi['pernah_psikotes'] == 1;
-  _ctrl.tidakPernahPsikotes = preferensi['pernah_psikotes'] == 0;
-  _ctrl.psikotesKapan.text = preferensi['psikotes_kapan'] ?? '';
-  _ctrl.psikotesUntuk.text = preferensi['psikotes_untuk'] ?? '';
-  _ctrl.gajiDiharapkan.text = preferensi['gaji_diharapkan'] ?? '';
-  _ctrl.fasilitasDiharapkan.text = preferensi['fasilitas_diharapkan'] ?? '';
-}
-
-final kesehatan = data['kesehatan'] ?? [];
-for (final k in kesehatan) {
-  if (k['jenis'] == 'Sakit') {
-    _ctrl.pernahSakit = k['pernah'] == 1;
-    _ctrl.tidakPernahSakit = k['pernah'] == 0;
-    _ctrl.sakitKapan.text = k['kapan'] ?? '';
-    _ctrl.sakitApa.text = k['keterangan'] ?? '';
-    _ctrl.sakitAkibat.text = k['akibat'] ?? '';
-  } else if (k['jenis'] == 'Kecelakaan') {
-    _ctrl.pernahKecelakaan = k['pernah'] == 1;
-    _ctrl.tidakPernahKecelakaan = k['pernah'] == 0;
-    _ctrl.kecelakaanKapan.text = k['kapan'] ?? '';
-    _ctrl.kecelakaanApa.text = k['keterangan'] ?? '';
-    _ctrl.kecelakaanAkibat.text = k['akibat'] ?? '';
-  }
-}
-      _isLoading = false;
+          case 'UNIVERSITAS':
+            _ctrl.univNama.text = f['nama_institusi'] ?? '';
+            _ctrl.univTahunMulai.text = f['tahun_mulai']?.toString() ?? '';
+            _ctrl.univTahunSelesai.text = f['tahun_selesai']?.toString() ?? '';
+            _ctrl.univJurusan.text = f['jurusan'] ?? '';
+            _ctrl.univPrestasi.text = f['prestasi'] ?? '';
+            break;
+        }
+      }
     });
 
-    
+    final nonFormal = data['pendidikan_non_formal'] ?? [];
+    for (int i = 0; i < nonFormal.length && i < 3; i++) {
+      final nf = nonFormal[i];
+      _ctrl.nfNamaLembaga[i].text = nf['nama_lembaga'] ?? '';
+      _ctrl.nfAlamatLembaga[i].text = nf['alamat'] ?? '';
+      _ctrl.nfTahun[i].text = nf['tahun']?.toString() ?? '';
+      _ctrl.nfMateri[i].text = nf['materi'] ?? '';
+    }
+
+    final bahasaAsing = data['bahasa_asing'] ?? [];
+    for (int i = 0; i < bahasaAsing.length && i < 3; i++) {
+      final ba = bahasaAsing[i];
+      _ctrl.bahasa[i].text = ba['bahasa'] ?? '';
+      _ctrl.bahasaTertulis[i] = ba['penguasaan_tertulis'];
+      _ctrl.bahasaLisan[i] = ba['penguasaan_lisan'];
+      _ctrl.bahasaKeterangan[i].text = ba['keterangan'] ?? '';
+    }
+
+    final komputer = data['keterampilan_komputer'];
+    if (komputer != null) {
+      _ctrl.msWord = komputer['ms_word'] == 1;
+      _ctrl.msExcel = komputer['ms_excel'] == 1;
+      _ctrl.msPowerPoint = komputer['ms_powerpoint'] == 1;
+      _ctrl.sql = komputer['sql_skill'] == 1;
+      _ctrl.lan = komputer['lan'] == 1;
+      _ctrl.pascal = komputer['pascal'] == 1;
+      _ctrl.cLang = komputer['c_language'] == 1;
+      _ctrl.softwareLain = komputer['software_lain'] == 1;
+      _ctrl.keahlianKhusus.text = komputer['keahlian_khusus'] ?? '';
+      _ctrl.citaCita.text = komputer['cita_cita'] ?? '';
+      _ctrl.kegiatanWaktuLuang.text = komputer['kegiatan_waktu_luang'] ?? '';
+      _ctrl.hobby.text = komputer['hobby'] ?? '';
+    }
+
+    final pengalamanKerja = data['pengalaman_kerja'] ?? [];
+    for (int i = 0; i < pengalamanKerja.length && i < 3; i++) {
+      final pk = pengalamanKerja[i];
+      _ctrl.perNamaPerusahaan[i].text = pk['nama_perusahaan'] ?? '';
+      _ctrl.perAlamatPerusahaan[i].text = pk['alamat'] ?? '';
+      _ctrl.perLamaMulai[i].text = pk['mulai'] ?? '';
+      _ctrl.perLamaSelesai[i].text = pk['selesai'] ?? '';
+      _ctrl.perTelp[i].text = pk['telp'] ?? '';
+      _ctrl.perAtasan[i].text = pk['atasan'] ?? '';
+      _ctrl.perGaji[i].text = pk['gaji'] ?? '';
+      _ctrl.perUraianTugas[i].text = pk['uraian_tugas'] ?? '';
+      _ctrl.perAlasanBerhenti[i].text = pk['alasan_berhenti'] ?? '';
+    }
+
+    final organisasi = data['organisasi'] ?? [];
+    for (int i = 0; i < organisasi.length && i < 3; i++) {
+      final org = organisasi[i];
+      _ctrl.orgNama[i].text = org['nama'] ?? '';
+      _ctrl.orgTempat[i].text = org['tempat'] ?? '';
+      _ctrl.orgSifat[i].text = org['sifat'] ?? '';
+      _ctrl.orgLama[i].text = org['lama'] ?? '';
+      _ctrl.orgJabatan[i].text = org['jabatan'] ?? '';
+    }
+
+    final kontakDarurat = data['kontak_darurat'] ?? [];
+    for (int i = 0; i < kontakDarurat.length && i < 2; i++) {
+      final kd = kontakDarurat[i];
+      _ctrl.darNama[i].text = kd['nama'] ?? '';
+      _ctrl.darAlamat[i].text = kd['alamat'] ?? '';
+      _ctrl.darTelp[i].text = kd['telp'] ?? '';
+      _ctrl.darHubungan[i].text = kd['hubungan'] ?? '';
+    }
+
+    final referensi = data['referensi'] ?? [];
+    for (int i = 0; i < referensi.length && i < 2; i++) {
+      final ref = referensi[i];
+      _ctrl.refNama[i].text = ref['nama'] ?? '';
+      _ctrl.refAlamat[i].text = ref['alamat'] ?? '';
+      _ctrl.refTelp[i].text = ref['telp'] ?? '';
+      _ctrl.refPekerjaan[i].text = ref['pekerjaan'] ?? '';
+      _ctrl.refHubungan[i].text = ref['hubungan'] ?? '';
+    }
+
+    final preferensi = data['preferensi_pekerjaan'];
+    if (preferensi != null) {
+      _ctrl.bersediaLembur = preferensi['bersedia_lembur'] == 1;
+      _ctrl.bersediaTugasLuarKota = preferensi['tugas_luar_kota'] == 1;
+      _ctrl.bersediaDitempatkanLuarKota =
+          preferensi['ditempatkan_luar_kota'] == 1;
+      _ctrl.pekerjaanDisukai.text = preferensi['pekerjaan_disukai'] ?? '';
+      _ctrl.bidangDisukai.text = preferensi['bidang_disukai'] ?? '';
+      _ctrl.pekerjaanTidakDisukai.text =
+          preferensi['pekerjaan_tidak_disukai'] ?? '';
+      _ctrl.bidangTidakDisukai.text = preferensi['bidang_tidak_disukai'] ?? '';
+      _ctrl.pernahPsikotes = preferensi['pernah_psikotes'] == 1;
+      _ctrl.tidakPernahPsikotes = preferensi['pernah_psikotes'] == 0;
+      _ctrl.psikotesKapan.text = preferensi['psikotes_kapan'] ?? '';
+      _ctrl.psikotesUntuk.text = preferensi['psikotes_untuk'] ?? '';
+      _ctrl.gajiDiharapkan.text = preferensi['gaji_diharapkan'] ?? '';
+      _ctrl.fasilitasDiharapkan.text = preferensi['fasilitas_diharapkan'] ?? '';
+    }
+
+    final kesehatan = data['kesehatan'] ?? [];
+    for (final k in kesehatan) {
+      if (k['jenis'] == 'Sakit') {
+        _ctrl.pernahSakit = k['pernah'] == 1;
+        _ctrl.tidakPernahSakit = k['pernah'] == 0;
+        _ctrl.sakitKapan.text = k['kapan'] ?? '';
+        _ctrl.sakitApa.text = k['keterangan'] ?? '';
+        _ctrl.sakitAkibat.text = k['akibat'] ?? '';
+      } else if (k['jenis'] == 'Kecelakaan') {
+        _ctrl.pernahKecelakaan = k['pernah'] == 1;
+        _ctrl.tidakPernahKecelakaan = k['pernah'] == 0;
+        _ctrl.kecelakaanKapan.text = k['kapan'] ?? '';
+        _ctrl.kecelakaanApa.text = k['keterangan'] ?? '';
+        _ctrl.kecelakaanAkibat.text = k['akibat'] ?? '';
+      }
+    }
+    if (_ctrl.fotoPath != null && _ctrl.fotoPath!.isNotEmpty) {
+      await _loadPhotoFromServer(_ctrl.fotoPath!);
+    }
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  // ⭐ TAMBAHKAN METHOD BARU INI (taruh setelah _loadFromApi dan sebelum dispose)
+  Future<void> _loadPhotoFromServer(String fotoPath) async {
+    try {
+      // Buat URL lengkap dari path
+      final baseUrl = ApiConfig.baseUrl.split('/job_preparation')[0]; // Ambil base: http://192.168.56.1:81/simass
+      final photoUrl = '$baseUrl/$fotoPath';
+      print('Loading photo from: $photoUrl'); // Debug
+
+      // Download foto dari server
+      final response = await http.get(Uri.parse(photoUrl));
+
+      if (response.statusCode == 200) {
+        // Simpan bytes foto ke controller
+        _ctrl.fotoBytes = response.bodyBytes;
+        print('✅ Photo loaded successfully');
+      } else {
+        print('❌ Failed to load photo: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ Error loading photo: $e');
+    }
   }
 
   @override
@@ -230,30 +263,30 @@ for (final k in kesehatan) {
   }
 
   InputDecoration _dec({String? hint, IconData? icon}) => InputDecoration(
-        hintText: hint,
-        prefixIcon: icon == null ? null : Icon(icon, size: 18),
-        filled: true,
-        fillColor: Colors.white,
-        isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-          borderSide: BorderSide(color: primaryBlue, width: 1.4),
-        ),
-        errorBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-          borderSide: BorderSide(color: Colors.red, width: 1.2),
-        ),
-        focusedErrorBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-          borderSide: BorderSide(color: Colors.red, width: 1.4),
-        ),
-      );
+    hintText: hint,
+    prefixIcon: icon == null ? null : Icon(icon, size: 18),
+    filled: true,
+    fillColor: Colors.white,
+    isDense: true,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
+    ),
+    focusedBorder: const OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+      borderSide: BorderSide(color: primaryBlue, width: 1.4),
+    ),
+    errorBorder: const OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+      borderSide: BorderSide(color: Colors.red, width: 1.2),
+    ),
+    focusedErrorBorder: const OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+      borderSide: BorderSide(color: Colors.red, width: 1.4),
+    ),
+  );
 
   Widget _section(String title, Widget child) {
     return Card(
@@ -305,145 +338,146 @@ for (final k in kesehatan) {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(ok
-            ? 'Data Job Preparation berhasil disimpan'
-            : 'Gagal menyimpan data'),
+        content: Text(
+          ok
+              ? 'Data Job Preparation berhasil disimpan'
+              : 'Gagal menyimpan data',
+        ),
       ),
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-return Scaffold(
-  body: Container(
-    decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        colors: [primaryBlue, secondaryBlue],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-    ),
-    child: SafeArea(
-      bottom: false,
-      child: Stack(
-        children: [
-          // Konten utama yang bisa di-scroll
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1100),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Form(
-                  key: _formKey,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildHeader(),
-                      const SizedBox(height: 16),
-                      // SECTION 1: Identitas Pribadi
-                      _section(
-                        'I. Identitas Pribadi',
-                        IdentitasPribadiSection(
-                          controllers: _ctrl,
-                          decoration: _dec,
-                        ),
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [primaryBlue, secondaryBlue],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: Stack(
+            children: [
+              // Konten utama yang bisa di-scroll
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1100),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Form(
+                      key: _formKey,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildHeader(),
+                          const SizedBox(height: 16),
+                          // SECTION 1: Identitas Pribadi
+                          _section(
+                            'I. Identitas Pribadi',
+                            IdentitasPribadiSection(
+                              controllers: _ctrl,
+                              decoration: _dec,
+                            ),
+                          ),
+                          // SECTION 2: Pendidikan Formal
+                          _section(
+                            'II. Pendidikan Formal',
+                            PendidikanFormalSection(
+                              controllers: _ctrl,
+                              decoration: _dec,
+                            ),
+                          ),
+                          _section(
+                            'III. Pendidikan Non-Formal',
+                            PendidikanNonFormalSection(
+                              controllers: _ctrl,
+                              decoration: _dec,
+                            ),
+                          ),
+                          _section(
+                            'IV. Bahasa Asing',
+                            BahasaAsingSection(
+                              controllers: _ctrl,
+                              decoration: _dec,
+                            ),
+                          ),
+                          _section(
+                            'V. Keterampilan Komputer',
+                            KeterampilanKomputerSection(
+                              controllers: _ctrl,
+                              decoration: _dec,
+                            ),
+                          ),
+                          _section(
+                            'VI. Pengalaman Kerja',
+                            PengalamanKerjaSection(
+                              controllers: _ctrl,
+                              decoration: _dec,
+                            ),
+                          ),
+                          _section(
+                            'VII. Organisasi',
+                            OrganisasiSection(
+                              controllers: _ctrl,
+                              decoration: _dec,
+                            ),
+                          ),
+                          _section(
+                            'VIII. Kontak Darurat',
+                            KontakDaruratSection(
+                              controllers: _ctrl,
+                              decoration: _dec,
+                            ),
+                          ),
+                          _section(
+                            'IX. Referensi',
+                            ReferensiSection(
+                              controllers: _ctrl,
+                              decoration: _dec,
+                            ),
+                          ),
+                          _section(
+                            'X. Preferensi Pekerjaan',
+                            PreferensiPekerjaanSection(
+                              controllers: _ctrl,
+                              decoration: _dec,
+                            ),
+                          ),
+                          _section(
+                            'XI. Riwayat Kesehatan',
+                            KesehatanSection(
+                              controllers: _ctrl,
+                              decoration: _dec,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 100,
+                          ), // Beri ruang untuk tombol floating
+                        ],
                       ),
-                      // SECTION 2: Pendidikan Formal
-                      _section(
-                        'II. Pendidikan Formal',
-                        PendidikanFormalSection(
-                          controllers: _ctrl,
-                          decoration: _dec,
-                        ),
-                      ),
-                      _section(
-                        'III. Pendidikan Non-Formal',
-                        PendidikanNonFormalSection(
-                          controllers: _ctrl,
-                          decoration: _dec,
-                        ),
-                      ),
-                      _section(
-                        'IV. Bahasa Asing',
-                        BahasaAsingSection(
-                          controllers: _ctrl,
-                          decoration: _dec,
-                        ),
-                      ),
-                      _section(
-                        'V. Keterampilan Komputer',
-                        KeterampilanKomputerSection(
-                          controllers: _ctrl,
-                          decoration: _dec,
-                        ),
-                      ),
-                      _section(
-                        'VI. Pengalaman Kerja',
-                        PengalamanKerjaSection(
-                          controllers: _ctrl,
-                          decoration: _dec,
-                        ),
-                      ),
-                      _section(
-                        'VII. Organisasi',
-                        OrganisasiSection(
-                          controllers: _ctrl,
-                          decoration: _dec,
-                        ),
-                      ),
-                      _section(
-                        'VIII. Kontak Darurat',
-                        KontakDaruratSection(
-                          controllers: _ctrl,
-                          decoration: _dec,
-                        ),
-                      ),
-                      _section(
-                        'IX. Referensi',
-                        ReferensiSection(
-                          controllers: _ctrl,
-                          decoration: _dec,
-                        ),
-                      ),
-                      _section(
-                        'X. Preferensi Pekerjaan',
-                        PreferensiPekerjaanSection(
-                          controllers: _ctrl,
-                          decoration: _dec,
-                        ),
-                      ),
-                      _section(
-                        'XI. Riwayat Kesehatan',
-                        KesehatanSection(
-                          controllers: _ctrl,
-                          decoration: _dec,
-                        ),
-                      ),
-                      const SizedBox(height: 100), // Beri ruang untuk tombol floating
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
+              // Tombol floating di pojok kiri bawah
+              _buildSubmitButton(),
+            ],
           ),
-          // Tombol floating di pojok kiri bawah
-          _buildSubmitButton(),
-        ],
+        ),
       ),
-    ),
-  ),
-);
-}
+    );
+  }
 
-Widget _buildHeader() {
+  Widget _buildHeader() {
     return Card(
       elevation: 10,
       shadowColor: Colors.black.withOpacity(0.18),
@@ -462,9 +496,13 @@ Widget _buildHeader() {
           children: [
             Row(
               children: [
-                _buildLogo('assets/images/logo_uhw.png'), // Ganti dengan path logo UHW
+                _buildLogo(
+                  'assets/images/logo_uhw.png',
+                ), // Ganti dengan path logo UHW
                 const SizedBox(width: 12),
-                _buildLogo('assets/images/LogoIACBE.png'), // Ganti dengan path logo IACBE
+                _buildLogo(
+                  'assets/images/LogoIACBE.png',
+                ), // Ganti dengan path logo IACBE
               ],
             ),
             const SizedBox(width: 16),
@@ -538,17 +576,12 @@ Widget _buildHeader() {
         icon: const Icon(Icons.save, size: 20),
         label: const Text(
           'Simpan',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
         ),
         backgroundColor: sectionHeader,
         foregroundColor: Colors.white,
         elevation: 8,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }

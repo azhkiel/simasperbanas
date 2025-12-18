@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data'; // Tambahkan ini
+import 'package:flutter/foundation.dart' show kIsWeb; 
+import 'package:http/http.dart' as http;  // ⭐ TAMBAHKAN INI
+import '/services/api_config.dart';
 import '../controllers.dart';
 import '../constants.dart';
+import '../job_preparation_service.dart';
 
 class IdentitasPribadiSection extends StatefulWidget {
   final JobPreparationControllers controllers;
@@ -17,10 +24,272 @@ class IdentitasPribadiSection extends StatefulWidget {
 }
 
 class _IdentitasPribadiSectionState extends State<IdentitasPribadiSection> {
+  File? _selectedImage;
+  Uint8List? _imageBytes;
+  String? _uploadedPhotoUrl;
+  bool _isUploading = false;
+  bool _isLoadingPhoto = false; 
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadExistingPhoto();
+  }
+
+  @override
+  void didUpdateWidget(IdentitasPribadiSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reload foto jika controller berubah
+    if (oldWidget.controllers.fotoBytes != widget.controllers.fotoBytes) {
+      _loadExistingPhoto();
+    }
+  }
+
+  Future<void> _loadExistingPhoto() async {
+    // Jika sudah ada bytes di controller, langsung pakai
+    if (widget.controllers.fotoBytes != null) {
+      setState(() {
+        _imageBytes = widget.controllers.fotoBytes;
+      });
+      return;
+    }
+
+    // Jika tidak ada bytes tapi ada path, download dari server
+    if (widget.controllers.fotoPath != null && 
+        widget.controllers.fotoPath!.isNotEmpty) {
+      await _downloadPhotoFromServer(widget.controllers.fotoPath!);
+    }
+  }
+  Future<void> _downloadPhotoFromServer(String fotoPath) async {
+    setState(() {
+      _isLoadingPhoto = true;
+    });
+
+    try {
+      final baseUrl = ApiConfig.baseUrl.split('/job_preparation')[0]; // Ambil base: http://192.168.56.1:81/simass
+      final photoUrl = '$baseUrl/$fotoPath';
+      print('Downloading photo from: $photoUrl');
+      
+      final response = await http.get(Uri.parse(photoUrl));
+      
+      if (response.statusCode == 200) {
+        setState(() {
+          _imageBytes = response.bodyBytes;
+          widget.controllers.fotoBytes = response.bodyBytes;
+        });
+        print('✅ Photo downloaded successfully');
+      } else {
+        print('❌ Failed to download photo: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ Error downloading photo: $e');
+    } finally {
+      setState(() {
+        _isLoadingPhoto = false;
+      });
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      maxHeight: 800,
+      imageQuality: 85,
+    );
+
+    if (image != null) {
+      final bytes = await image.readAsBytes();
+      
+      setState(() {
+        if (!kIsWeb) {
+          _selectedImage = File(image.path);
+        }
+        _imageBytes = bytes;
+        widget.controllers.fotoBytes = bytes; // Simpan di controller
+      });
+
+      // Upload langsung ke server
+      await _uploadToServer(bytes, image.name);
+    }
+  }
+
+  Future<void> _uploadToServer(Uint8List bytes, String filename) async {
+    setState(() {
+      _isUploading = true;
+    });
+
+    try {
+      final result = await JobPreparationService.uploadFoto(bytes, filename);
+
+      if (result != null) {
+        setState(() {
+          _uploadedPhotoUrl = result['url'];
+          widget.controllers.fotoPath = result['path']; // Simpan path untuk database
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Foto berhasil diupload!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Gagal upload foto'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error upload: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } finally {
+      setState(() {
+        _isUploading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Upload Foto Section
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.blue.shade200),
+          ),
+          child: Column(
+            children: [
+              Text(
+                'Foto Identitas Pribadi',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue.shade700,
+                ),
+              ),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: (_isUploading || _isLoadingPhoto) ? null : _pickImage, // ⭐ UPDATE INI
+                child: Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: (_isUploading || _isLoadingPhoto)  // ⭐ UPDATE INI
+                          ? Colors.blue 
+                          : Colors.grey.shade300,
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: (_isUploading || _isLoadingPhoto)  // ⭐ UPDATE INI
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const CircularProgressIndicator(),
+                              const SizedBox(height: 8),
+                              Text(
+                                _isUploading ? 'Uploading...' : 'Loading...', // ⭐ UPDATE INI
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        )
+                      : _imageBytes != null
+                          ? Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.memory(
+                                    _imageBytes!,
+                                    fit: BoxFit.cover,
+                                    width: 150,
+                                    height: 150,
+                                  ),
+                                ),
+                                // ⭐ UPDATE INI - Ganti kondisi
+                                if (widget.controllers.fotoPath != null)
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.green,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_a_photo,
+                                  size: 40,
+                                  color: Colors.grey.shade400,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Upload Foto',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Ukuran maks: 2MB | Format: JPG, PNG',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
         // Row 1: Nama Lengkap & Nama Panggilan
         Row(
           children: [
@@ -254,7 +523,52 @@ class _IdentitasPribadiSectionState extends State<IdentitasPribadiSection> {
         ),
         const SizedBox(height: 12),
 
-        // Row 9: Tinggi Badan & Berat Badan
+        // Row 9: Memakai Kacamata & Kewarganegaraan
+        Row(
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: yaTidakOptions.contains(widget.controllers.memakaiKacamata) 
+                    ? widget.controllers.memakaiKacamata 
+                    : null,
+                decoration: widget.decoration(
+                  hint: 'Kacamata', // ⭐ Persingkat hint
+                  icon: Icons.visibility,
+                ),
+                items: yaTidakOptions
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+                onChanged: (v) {
+                  setState(() {
+                    widget.controllers.memakaiKacamata = v;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: kewarganegaraanOptions.contains(widget.controllers.kewarganegaraan) 
+                    ? widget.controllers.kewarganegaraan 
+                    : null,
+                decoration: widget.decoration(
+                  hint: 'Kewarganegaraan',
+                  icon: Icons.flag,
+                ),
+                items: kewarganegaraanOptions
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+                onChanged: (v) {
+                  setState(() {
+                    widget.controllers.kewarganegaraan = v;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Row 10: Tinggi Badan & Berat Badan
         Row(
           children: [
             Expanded(
@@ -292,7 +606,7 @@ class _IdentitasPribadiSectionState extends State<IdentitasPribadiSection> {
         ),
         const SizedBox(height: 12),
 
-        // Row 10: Golongan Darah & Suku Bangsa
+        // Row 11: Golongan Darah & Suku Bangsa
         Row(
           children: [
             Expanded(
@@ -328,7 +642,7 @@ class _IdentitasPribadiSectionState extends State<IdentitasPribadiSection> {
         ),
         const SizedBox(height: 12),
 
-        // Row 11: No KTP & Berlaku Hingga
+        // Row 12: No KTP & Berlaku Hingga
         Row(
           children: [
             Expanded(
